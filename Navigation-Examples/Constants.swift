@@ -11,6 +11,13 @@ typealias NamedController = (
 
 let listOfExamples: [NamedController] = [
     (
+        name: "NHVR Navigator",
+        description: "Navigation with restricted asset avoidance",
+        controller: BasicViewController.self,
+        storyboard: nil,
+        pushExampleToViewController: true
+    ),
+    (
         name: "Advanced Implementation",
         description: """
         Demonstrates how to display a custom map style and how to apply stylized components in the UI.
@@ -22,13 +29,6 @@ let listOfExamples: [NamedController] = [
         controller: AdvancedViewController.self,
         storyboard: nil,
         pushExampleToViewController: true
-    ),
-    (
-        name: "Basic",
-        description: "A basic hello world example showing how to create a navigation experience using the fewest lines of code possible.",
-        controller: BasicViewController.self,
-        storyboard: nil,
-        pushExampleToViewController: false
     ),
     (
         name: "Custom Destination Marker",
