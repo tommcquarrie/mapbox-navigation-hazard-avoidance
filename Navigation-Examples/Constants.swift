@@ -11,9 +11,16 @@ typealias NamedController = (
 
 let listOfExamples: [NamedController] = [
     (
-        name: "NHVR Navigator",
+        name: "NHVR Navigator - Hazard Avoidance",
         description: "Navigation with restricted asset avoidance",
-        controller: BasicViewController.self,
+        controller: NhvrNavigatorViewController.self,
+        storyboard: nil,
+        pushExampleToViewController: true
+    ),
+    (
+        name: "NHVR Navigator - Hazard Alerts",
+        description: "Navigation with restricted asset alerts",
+        controller: NhvrHazardAlertViewController.self,
         storyboard: nil,
         pushExampleToViewController: true
     ),
@@ -27,6 +34,13 @@ let listOfExamples: [NamedController] = [
         Note: The Directions API will not always return alternative routes.
         """,
         controller: AdvancedViewController.self,
+        storyboard: nil,
+        pushExampleToViewController: true
+    ),
+    (
+        name: "Electronic Horizon Events Observing",
+        description: "Demonstrates how to use electronic horizon to predict user's most probable path and show upcoming intersections. Simulate Navigation option isn't supported here, instead you can simulate location in Xcode.",
+        controller: ElectronicHorizonEventsViewController.self,
         storyboard: nil,
         pushExampleToViewController: true
     ),
@@ -132,13 +146,6 @@ let listOfExamples: [NamedController] = [
         name: "Location Snapping",
         description: "Demonstrates how to snap user location to the road network in a map view outside of active turn-by-turn navigation. Simulate Navigation option isn't supported here, instead you can use location simulation inside of the Simulator (Features ‣ Location ‣ \"City Bicycle Ride\") to see the difference with and without snapping.",
         controller: LocationSnappingViewController.self,
-        storyboard: nil,
-        pushExampleToViewController: true
-    ),
-    (
-        name: "Electronic Horizon Events Observing",
-        description: "Demonstrates how to use electronic horizon to predict user's most probable path and show upcoming intersections. Simulate Navigation option isn't supported here, instead you can simulate location in Xcode.",
-        controller: ElectronicHorizonEventsViewController.self,
         storyboard: nil,
         pushExampleToViewController: true
     ),

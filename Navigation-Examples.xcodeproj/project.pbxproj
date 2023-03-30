@@ -54,6 +54,8 @@
 		C5F130A01FE9B44600463E86 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F1309F1FE9B44600463E86 /* Constants.swift */; };
 		C5F130A61FEB2D7800463E86 /* Advanced.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5F130A51FEB2D7800463E86 /* Advanced.swift */; };
 		CC6D97FED3D0CBEF7CA47168 /* Pods_Navigation_Examples.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C8592DC8F0A49F0C2214E1AC /* Pods_Navigation_Examples.framework */; };
+		F018755329CD1B0600191B0B /* NHVR-Navigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F018755229CD1B0600191B0B /* NHVR-Navigator.swift */; };
+		F018755529CD1FA300191B0B /* NHVR-HazardAvoidance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F018755429CD1FA300191B0B /* NHVR-HazardAvoidance.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -115,6 +117,8 @@
 		C5F130A51FEB2D7800463E86 /* Advanced.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Advanced.swift; sourceTree = "<group>"; };
 		C8592DC8F0A49F0C2214E1AC /* Pods_Navigation_Examples.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Navigation_Examples.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E4F99A65CCB2B9CB623270EE /* Pods-Navigation-Examples.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Navigation-Examples.debug.xcconfig"; path = "Target Support Files/Pods-Navigation-Examples/Pods-Navigation-Examples.debug.xcconfig"; sourceTree = "<group>"; };
+		F018755229CD1B0600191B0B /* NHVR-Navigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NHVR-Navigator.swift"; sourceTree = "<group>"; };
+		F018755429CD1FA300191B0B /* NHVR-HazardAvoidance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NHVR-HazardAvoidance.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -284,6 +288,8 @@
 				8A2DFA52261650600034A87E /* NavigationCamera */,
 				8AC9129E2494118400B6941E /* TestData */,
 				2B521D5324094F2500984CF8 /* CustomBars */,
+				F018755229CD1B0600191B0B /* NHVR-Navigator.swift */,
+				F018755429CD1FA300191B0B /* NHVR-HazardAvoidance.swift */,
 			);
 			path = Examples;
 			sourceTree = "<group>";
@@ -647,12 +653,14 @@
 				8DF510741FEB08F70049DB9C /* Embedded-Navigation.swift in Sources */,
 				11B6E81726176F3600872E4D /* Upcoming-Intersection.swift in Sources */,
 				2B5470632816C74A0068DA3F /* Custom-RoutingProvider.swift in Sources */,
+				F018755329CD1B0600191B0B /* NHVR-Navigator.swift in Sources */,
 				C58FB8711FE8A43000C4B491 /* Basic.swift in Sources */,
 				8A2DFA57261650A60034A87E /* CustomCameraStateTransition.swift in Sources */,
 				C58FB8731FE98AEB00C4B491 /* Styled-UI-Elements.swift in Sources */,
 				C58FB85A1FE899B800C4B491 /* AppDelegate.swift in Sources */,
 				8AE033222628EDFF000E7145 /* Route-Lines-Styling.swift in Sources */,
 				8A33629624E4844E0086C647 /* Building-Extrusion.swift in Sources */,
+				F018755529CD1FA300191B0B /* NHVR-HazardAvoidance.swift in Sources */,
 				8A2DFA58261650A60034A87E /* CustomViewportDataSource.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -838,6 +846,7 @@
 				DEVELOPMENT_TEAM = 3488B87SVF;
 				INFOPLIST_FILE = "Navigation-Examples/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "au.gov.nhvr.Navigation-Examples";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -855,6 +864,7 @@
 				DEVELOPMENT_TEAM = 3488B87SVF;
 				INFOPLIST_FILE = "Navigation-Examples/Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.navigation";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "au.gov.nhvr.Navigation-Examples";
 				PRODUCT_NAME = "$(TARGET_NAME)";

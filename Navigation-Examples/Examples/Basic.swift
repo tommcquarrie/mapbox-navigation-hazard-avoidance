@@ -39,6 +39,7 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
 
     var navigationMapView: NavigationMapView!
     var navigationViewController: NavigationViewController!
+    var navigationService: NavigationService!
     var startButton: UIButton!
     var origin = CLLocationCoordinate2DMake(-37.7620033, 144.9733776)
     var destination = CLLocationCoordinate2DMake(-37.7779878, 144.9710791)
@@ -46,7 +47,9 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
     private let passiveLocationManager = PassiveLocationManager()
     private lazy var passiveLocationProvider = PassiveLocationProvider(locationManager: passiveLocationManager)
     private var totalDistance: CLLocationDistance = 0.0
-    let OBSTACLE_ALERT_DISTANCE:LocationDistance = 20
+    let OBSTACLE_ALERT_DISTANCE:LocationDistance = 200
+    let OBSTACLE_DEATH_DISTANCE:LocationDistance = 15
+    let ROAD_WIDTH_TOLERANCE:LocationDistance = 20
     
     // obstacles to avoid
     let obs1 = CLLocationCoordinate2D(latitude: -37.76921612135003, longitude: 144.97224769222004)
@@ -127,12 +130,6 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
         let annotationsManager = navigationMapView.mapView.annotations.makeCircleAnnotationManager()
         annotationsManager.annotations = obstacle_map_circles
         
-        // Set the annotation manager's delegate
-//        navigationMapView.mapView.mapboxMap.onNext(event: .mapLoaded) { [weak self] _ in
-//            guard let self = self else { return }
-//            self.navigationMapView.pointAnnotationManager?.delegate = self
-//        }
-        
         let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
         navigationMapView.addGestureRecognizer(longPressGestureRecognizer)
         
@@ -156,7 +153,7 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
     
     func setupElectronicHorizonUpdates() {
         // Customize the `ElectronicHorizonOptions` for `PassiveLocationManager` to start Electronic Horizon updates.
-        let options = ElectronicHorizonOptions(length: 100, expansionLevel: 1, branchLength: 50, minTimeDeltaBetweenUpdates: nil)
+        let options = ElectronicHorizonOptions(length: 500, expansionLevel: 1, branchLength: 50, minTimeDeltaBetweenUpdates: nil)
         passiveLocationManager.startUpdatingElectronicHorizon(with: options)
         subscribeToElectronicHorizonUpdates()
     }
@@ -182,6 +179,7 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
 
         // Update the most probable path when the position update indicates a new most probable path (MPP).
         if updatesMostProbablePath {
+//            print("updateMostProbablePath")
             let mostProbablePath = routeLine(from: horizonTree, roadGraph: passiveLocationManager.roadGraph)
             updateMostProbablePath(with: mostProbablePath)
         }
@@ -220,7 +218,7 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
     
     private func navigate() {
             let indexedRouteResponse = IndexedRouteResponse(routeResponse: routeResponse, routeIndex: currentRouteIndex)
-            let navigationService = MapboxNavigationService(
+            navigationService = MapboxNavigationService(
                 indexedRouteResponse: indexedRouteResponse,
                 customRoutingProvider: NavigationSettings.shared.directions,
                 credentials: NavigationSettings.shared.directions.credentials,
@@ -267,11 +265,12 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
         view.setNeedsLayout()
     }
     
-    // Delegate method called when the user selects a route
+    // Enable selecting an alternate route
     func navigationMapView(_ mapView: NavigationMapView, didSelect route: Route) {
         self.currentRouteIndex = self.routes?.firstIndex(of: route) ?? 0
     }
     
+    // navigate to the pressed location on long press
     @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .ended else { return }
       destination = navigationMapView.mapView.mapboxMap.coordinate(for: gesture.location(in: navigationMapView.mapView))
@@ -320,42 +319,44 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
         }
     }
     
-    private func obstacleAhead(from edge: RoadGraph.Edge, roadGraph: RoadGraph) -> CLLocationDistance? {
-        var edge: RoadGraph.Edge? = edge
-        totalDistance = 0.0
+    private func distanceToClosestPoint(coordinates: [LocationCoordinate2D], to: LocationCoordinate2D) -> LocationDistance {
+        let line = LineString( coordinates )
+        let closestCoordinate = line.closestCoordinate(to: to)
+        return to.distance(to: closestCoordinate!.coordinate);
+    }
+    
+    private func obstacleAhead(from horizon: RoadGraph.Edge, roadGraph: RoadGraph) {
+        var edge: RoadGraph.Edge? = horizon
+        
+        guard let userLocation =
+                navigationService.locationManager.location else { return }
+            
+        let currentLocation = CLLocation(latitude: userLocation.coordinate.latitude,
+                              longitude: userLocation.coordinate.longitude)
 
-        // Update the route line shape and total distance of the most probable path.
         while let currentEdge = edge {
             if let shape = roadGraph.edgeShape(edgeIdentifier: currentEdge.identifier) {
-                    if let distance = roadGraph.edgeMetadata(edgeIdentifier: currentEdge.identifier)?.length {
-                        totalDistance += distance
-                        
-//                        print("### checking edge, distance \(distance), coordinates \(shape.coordinates)")
-                        
-                        let line = LineString( shape.coordinates )
-                        
-                        for obstacle in [obs1, obs2, obs3] {
-                            
-                            let closestCoordinate = line.closestCoordinate(to: obstacle)
-                            let distance:LocationDistance = obstacle.distance(to: closestCoordinate!.coordinate)
-                            
-//                            print("### CHECKING distance: \(distance)")
-                            
-                            if (distance < OBSTACLE_ALERT_DISTANCE) {
-                                // TODO: also check the distance between the obstacle and the vehicle
-                                print ("### OBSTACLE AHEAD!!! \(totalDistance)")
-                                return totalDistance
-                            }
-                            
-//                            print("### checking obstacle \(obstacle) against edge \(shape.coordinates)")
-//                            if (poly.contains(obstacle)){
-////                                print("### obstacle coming in \(totalDistance)")
-//                                return totalDistance;
-//                            }
-                        }
-                        
-                    }
                 
+                for obstacle in [obs1, obs2, obs3] {
+                    
+                    let distance = distanceToClosestPoint(coordinates: shape.coordinates, to: obstacle)
+                    
+                    // check if the obstacle is touching the road (which is a vector)
+                    if (distance < ROAD_WIDTH_TOLERANCE) {
+                        // TODO: also check the distance between the obstacle and the vehicle
+                        let obstacleDistanceFromVehicle = obstacle.distance(to: currentLocation.coordinate)
+                        print ("### OBSTACLE on path!!! distance from path: \(distance), distance from vehicle: \(obstacleDistanceFromVehicle)")
+                        if (obstacleDistanceFromVehicle < OBSTACLE_DEATH_DISTANCE) {
+                            print("You are now dead ☠️")
+                            navigationService.stop()
+                            return
+                        }
+                        else if (obstacleDistanceFromVehicle < OBSTACLE_ALERT_DISTANCE) {
+                            print ("### OBSTACLE AHEAD!!! \(obstacleDistanceFromVehicle)")
+                            return
+                        }
+                    }
+                }
             }
             
             // warning alert if there are hazards in proximity. if there is a branch with a hazard you don't want to turn onto that road.
@@ -365,7 +366,6 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
             // big red alert and audio alertwhen you are heading towards a hazard and must turn around
             edge = currentEdge.outletEdges.max(by: { $0.probability < $1.probability })
         }
-        return nil
     }
 
     private func routeLine(from edge: RoadGraph.Edge, roadGraph: RoadGraph) -> [LocationCoordinate2D] {
@@ -453,17 +453,6 @@ class BasicViewController: UIViewController, NavigationMapViewDelegate, Navigati
                                                                             value: jsonObject)
         }
     }
-    
-//    func annotationManager(_ manager: AnnotationManager, didDetectTappedAnnotations annotations: [Annotation]) {
-//        print("annotationManager")
-//        guard annotations.first?.id == beginAnnotation?.id,
-//        let routeResponse = routeResponse, let routeOptions = routeOptions else {
-//        return
-//        }
-//        let navigationViewController = NavigationViewController(for: routeResponse, routeIndex: 0, routeOptions: routeOptions)
-//        navigationViewController.modalPresentationStyle = .fullScreen
-//        self.present(navigationViewController, animated: true, completion: nil)
-//    }
     
     // Override layout lifecycle callback to be able to style the start button.
     override func viewDidLayoutSubviews() {
